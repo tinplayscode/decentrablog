@@ -210,26 +210,6 @@ impl Blog {
         posts
     }
 
-    // pub fn get_paging_posts(&self, page: usize, page_size: usize) -> Vec<Post> {
-    //     assert!(page_size.0 > 0, "page_size must be greater than 0");
-        
-    //     let mut posts = Vec::new();
-    //     let mut post_ids = self.user_posts.get(&env::signer_account_id()).unwrap();
-
-    //     //Sort by created_at
-    //     post_ids.sort_by(|a, b| {
-    //         let a_post = self.posts.get(a).unwrap();
-    //         let b_post = self.posts.get(b).unwrap();
-    //         b_post.created_at.cmp(&a_post.created_at)
-    //     });
-        
-
-    //     for post_id in post_ids.iter().skip(page.0 as usize * page_size.0 as usize).take(page_size.0 as usize) {
-    //         posts.push(self.posts.get(&post_id).unwrap());
-    //     }
-    //     posts
-    // }
-
     pub fn get_total_posts(&self) -> usize {
         self.total_posts
     }
@@ -318,7 +298,10 @@ impl Blog {
         self.next_comment_id = self.next_comment_id + 1;
         self.total_comments = self.total_comments + 1;
 
-        self.posts.get(&post_id).unwrap().donation_logs.push(donation_log);
+        // save to donation log
+        let mut post = self.posts.get(&post_id).unwrap();
+        post.donation_logs.push(donation_log);
+        self.posts.insert(&post_id, &post);
 
         let donor = env::signer_account_id();
 
@@ -440,7 +423,7 @@ mod tests {
             input,
             block_index: 0,
             block_timestamp: 0,
-            account_balance: 0,
+            account_balance: 1000000000000000000000000,
             account_locked_balance: 0,
             storage_usage: 0,
             attached_deposit: 0,
@@ -615,5 +598,24 @@ mod tests {
         // let posts = contract.get_paging_posts(5, 10);
         // assert_eq!(5, posts.len(), "Paging post size is not 5");
         // assert_eq!(17, posts[0].post_id, "Paging post id is not 17");
+    }
+
+    #[test]
+    fn test_donation() {
+        let context = get_context(vec![], false);
+        testing_env!(context);
+        let mut contract = Blog::default();
+
+        // Create the first post
+        contract.create_post("This is the title".to_string(), "Lets go Brandon!".to_string());
+
+        // Donate
+        contract.donate(0, 1000000, "Support Trump for the USA".to_string());
+
+        // Check if the donation is there
+        assert_eq!(
+            1,
+            contract.get_post(0).donation_logs.len()
+        );
     }
 }
