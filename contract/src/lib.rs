@@ -23,6 +23,7 @@ pub struct Blog {
     owner: AccountId,
     user_posts: UnorderedMap<AccountId, Vec<U64>>,
     posts: UnorderedMap<U64, Post>,
+    comments: UnorderedMap<U64, Comment>,
 
     next_post_id: U64,
     total_posts: U64,
@@ -38,6 +39,8 @@ impl Default for Blog {
       owner: env::signer_account_id(),
       user_posts: UnorderedMap::new(b"user_posts".to_vec()),
       posts: UnorderedMap::new(b"posts".to_vec()),
+      comments: UnorderedMap::new(b"comments".to_vec()),
+
       total_posts: U64::from(0),
       next_post_id: U64::from(0),
       total_comments: U64::from(0),
@@ -58,12 +61,52 @@ pub struct Post {
     pub body: String,
     pub author: AccountId,
     pub created_at: u64,
-    pub comments: Vec<Comment>,
+    pub comments: Vec<U64>,
 
     pub upvotes: Vec<AccountId>,
     pub downvotes: Vec<AccountId>,
     
     pub donation_logs: Vec<DonationLog>,
+}
+
+impl Post {
+    pub fn new(post_id: U64, title: String, body: String, author: AccountId, created_at: u64) -> Self {
+        Self {
+            post_id,
+            title,
+            body,
+            author,
+            created_at,
+            comments: Vec::new(),
+
+            upvotes: Vec::new(),
+            downvotes: Vec::new(),
+
+            donation_logs: Vec::new(),
+        }
+    }
+    
+    pub fn add_comment(&mut self, comment_id: U64) {
+        self.comments.push(comment_id);
+    }
+
+    pub fn add_upvote(&mut self, account_id: AccountId) {
+        self.upvotes.push(account_id.clone());
+        
+        //check if there is downvote, if so remove it
+        if self.downvotes.contains(&account_id) {
+            self.downvotes.retain(|x| *x != account_id);
+        }
+    }
+
+    pub fn add_downvote(&mut self, account_id: AccountId) {
+        self.downvotes.push(account_id.clone());
+
+        //check if there is upvote, if so remove it
+        if self.upvotes.contains(&account_id) {
+            self.upvotes.retain(|x| *x != account_id);
+        }
+    }
 }
 
 #[derive(Serialize, Deserialize, BorshDeserialize, BorshSerialize)]
@@ -139,11 +182,11 @@ impl Blog {
         self.total_posts = U64::from(self.total_posts.0 - 1);
     }
 
-    pub fn comment(&mut self, post_id: U64, comment: String) {
+    pub fn create_comment(&mut self, post_id: U64, body: String) {
         // Check if the post exists
-        let post = self.posts.get(&post_id).unwrap();
-        assert!(post.post_id == post_id, "Post does not exist");
-        assert!(comment.len() >= 10, "Comment must be at least 10 characters long");
+        let post = self.posts.get(&post_id);
+        assert!(post.is_some(), "Post does not exist");
+        assert!(body.len() >= 10, "Comment must be at least 10 characters long");
 
         let author = env::signer_account_id();
         let created_at = env::block_timestamp();
@@ -151,14 +194,15 @@ impl Blog {
         let comment = Comment {
             comment_id: U64::from(self.next_comment_id.0),
             author,
-            body: comment,
+            body,
             created_at,
         };
 
+        self.posts.get(&post_id).as_mut().unwrap().add_comment(comment.comment_id);
+
+        self.comments.insert(&comment.comment_id, &comment);
         self.next_comment_id = U64::from(self.next_comment_id.0 + 1);
         self.total_comments = U64::from(self.total_comments.0 + 1);
-
-        self.posts.get(&post_id).unwrap().comments.push(comment);
     }
 
     pub fn delete_comment(&mut self, post_id: U64, comment_id: U64) {
@@ -168,8 +212,8 @@ impl Blog {
         // Check if the post exists
         let post = self.posts.get(&post_id).unwrap();
         assert!(post.post_id == post_id, "Post does not exist");
-        let comment = post.comments.iter().find(|c| c.comment_id == comment_id);
-        assert!(comment.is_some(), "Comment does not exist");
+        let comment = self.comments.get(&comment_id).unwrap();
+        assert!(comment.comment_id == comment_id, "Comment does not exist");
         
         self.posts.get(&post_id).unwrap().comments.remove(comment_id.0 as usize);
         self.total_comments = U64::from(self.total_comments.0 - 1);
@@ -194,6 +238,7 @@ impl Blog {
         Promise::new(author).transfer(amount).then(self.save_to_donation_log(post_id, amount, message));
     }
 
+    #[private]
     fn save_to_donation_log(&mut self, post_id: U64, amount: u128, message: String) -> Promise {
         let donor = env::signer_account_id();
         let created_at = env::block_timestamp();
@@ -220,6 +265,57 @@ impl Blog {
     pub fn get_next_post_id(&self) -> U64 {
         self.next_post_id
     }
+
+    pub fn get_comments(&self, post_id: U64) -> Vec<Comment> {
+        let post = self.posts.get(&post_id).unwrap();
+        
+        let mut comments = Vec::new();
+        for comment_id in post.comments {
+            comments.push(self.comments.get(&comment_id).unwrap());
+        }
+        comments
+    }
+
+    pub fn get_paging_comments(self, post_id: U64, page: U64, page_size: U64) -> Vec<Comment> {
+        let post = self.posts.get(&post_id).unwrap();
+        let mut comments = Vec::new();
+        for comment_id in post.comments {
+            comments.push(self.comments.get(&comment_id).unwrap());
+        }
+        comments.sort_by(|a, b| b.created_at.cmp(&a.created_at));
+        comments.into_iter().skip((page.0 * page_size.0) as usize).take(page_size.0 as usize).collect()
+    }
+
+    pub fn get_total_comments(&self) -> U64 {
+        self.total_comments
+    }
+
+    pub fn get_comment(&self, comment_id: U64) -> Comment {
+        self.comments.get(&comment_id).unwrap()
+    }
+
+    pub fn get_post_total_comments(&self, post_id: U64) -> usize {
+        self.posts.get(&post_id).unwrap().comments.len()
+    }
+
+    // TODO: fix below error functions
+    // pub fn get_post_total_comments(&self, post_id: U64) -> usize {
+    //     let post = self.posts.get(&post_id).unwrap();
+    //     post.comments.len()
+    // }
+
+    // pub fn upvote(&mut self, post_id: U64) {
+    //     let author = env::signer_account_id();
+    //     let upvote = Upvote {
+    //         upvote_id: U64::from(self.next_upvote_id.0),
+    //         author,
+    //         created_at: env::block_timestamp(),
+    //     };
+
+    //     self.next_upvote_id = U64::from(self.next_upvote_id.0 + 1);
+
+    //     self.posts.get(&post_id).unwrap().upvotes.push(upvote);
+    // }
 }
 
 /*
@@ -262,7 +358,7 @@ mod tests {
     }
 
     #[test]
-        fn create_post() {
+    fn create_post() {
         let context = get_context(vec![], false);
         testing_env!(context);
         let mut contract = Blog::default();
@@ -311,5 +407,41 @@ mod tests {
             "npmrunstart_testnet".to_string(),
             contract.get_owner()
         );
+    }
+
+    #[test]
+    fn create_comment() {
+        let context = get_context(vec![], false);
+        testing_env!(context);
+        let mut contract = Blog::default();
+
+        // Create the first post
+        contract.create_post("This is the title".to_string(), "Lets go Brandon!".to_string());
+        contract.create_comment(U64::from(0), "This is the comment".to_string());
+
+        assert_eq!(
+            "This is the comment".to_string(),
+            contract.get_comment(U64::from(0)).body
+        );
+        assert_eq!(U64::from(0), contract.get_comment(U64::from(0)).comment_id);
+
+        contract.create_comment(U64::from(0), "This is comment 2, id 1".to_string());
+        contract.create_comment(U64::from(0), "This is comment 3, id 2".to_string());
+
+        // Check if the comments is there
+        assert_eq!(
+            "This is comment 2, id 1".to_string(),
+            contract.get_comment(U64::from(1)).body
+        );
+        assert_eq!(
+            "This is comment 3, id 2".to_string(),
+            contract.get_comment(U64::from(2)).body
+        );
+
+        let comments = contract.get_post(U64::from(0)).comments;
+
+        //assert size of comments
+        assert_eq!(3, comments.len(), "Comments size is not 3");
+        assert_eq!(3, contract.get_post_total_comments(U64::from(0)), "get_post_total_comments is not 3");
     }
 }

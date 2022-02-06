@@ -7,7 +7,7 @@
     "build:contract": "node contract/compile.js",
     "build:contract:debug": "node contract/compile.js --debug",
     "build:web": "parcel build src/index.html --public-url ./",
-    "dev:deploy:contract": "near dev-deploy",
+    "dev:deploy:contract": "near dev-deploy -f",
     "deploy:contract": "near deploy",
     "deploy:pages": "gh-pages -d dist/",
     "deploy": "npm run build && npm run deploy:contract && npm run deploy:pages",
@@ -27,7 +27,7 @@
     "jest-environment-node": "~26.6.2",
     "near-cli": "~2.1.1",
     "nodemon": "~2.0.3",
-    "parcel-bundler": "~1.12.4",
+    "parcel": "^2.0.0",
     "react-test-renderer": "~17.0.1",
     "shelljs": "~0.8.4"
   },
