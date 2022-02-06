@@ -84,35 +84,35 @@ On Windows, if you're seeing an error containing `EPERM` it may be related to sp
 
 # Sample commands
 
-dev-1644133353357-25535531537694
+dev-1644153243183-84684983943007
 
 Create first post
 
 ```
-npx near call dev-1644133353357-25535531537694 create_post '{"title" : "first post", "body": "Hello world"}' --accountId testzzz.testnet
+npx near call dev-1644153243183-84684983943007 create_post '{"title" : "first post", "body": "Hello world"}' --accountId testzzz.testnet
 ```
 
 Create second post
 
 ```
-npx near call dev-1644133353357-25535531537694 create_post '{"title" : "second post", "body": "Hello world"}' --accountId testzzz.testnet
+npx near call dev-1644153243183-84684983943007 create_post '{"title" : "second post", "body": "Hello world"}' --accountId testzzz.testnet
 ```
 
 Get second post
 
 ```
-npx near call dev-1644133353357-25535531537694 get_post '{"post_id" : "1"}' --accountId testzzz.testnet
+npx near call dev-1644153243183-84684983943007 get_post '{"post_id" : 1}' --accountId testzzz.testnet
 ```
 
 Comment
 
 ```
-npx near call dev-1644133353357-25535531537694 create_comment '{"post_id" : "1", "body": "hello there"}' --accountId testzzz.testnet
+npx near call dev-1644153243183-84684983943007 create_comment '{"post_id" : 1, "body": "hello there"}' --accountId testzzz.testnet
 ```
 
 Get all post comments
 
 ```
-npx near call dev-1644133353357-25535531537694 get_comments '{"post_id" : "1"}' --accountId testzzz.testnet
+npx near call dev-1644153243183-84684983943007 get_comments '{"post_id" : 1}' --accountId testzzz.testnet
 
 ```

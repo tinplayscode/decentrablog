@@ -4,6 +4,7 @@ import { login, logout } from "./utils";
 import "./global.css";
 
 import getConfig from "./config";
+import Layout from "./components/Layout";
 const { networkId } = getConfig(process.env.NODE_ENV || "development");
 
 export default function App() {
@@ -67,7 +68,7 @@ export default function App() {
 
   return (
     // use React Fragment, <>, to avoid wrapping elements in unnecessary divs
-    <>
+    <Layout>
       <button className="link" style={{ float: "right" }} onClick={logout}>
         Sign out
       </button>
@@ -203,7 +204,7 @@ export default function App() {
         </p>
       </main>
       {showNotification && <Notification />}
-    </>
+    </Layout>
   );
 }
 
