@@ -29,6 +29,15 @@ pub struct Blog {
     total_comments: usize,
     next_donation_id: usize,
     total_donations: usize,
+    
+}
+
+#[derive(Serialize, Deserialize, BorshDeserialize, BorshSerialize)]
+#[serde(crate = "near_sdk::serde")]
+pub enum VoteStatus {
+    Upvoted,
+    Downvoted,
+    None,
 }
 
 impl Default for Blog {
@@ -140,7 +149,7 @@ pub struct DonationLog {
 
 #[near_bindgen]
 impl Blog {
-    pub fn create_post(&mut self, title: String, body: String) {
+    pub fn create_post(&mut self, title: String, body: String) -> usize {
         let post_id = self.next_post_id;
 
         let post = Post {
@@ -160,10 +169,17 @@ impl Blog {
         self.total_posts = self.total_posts + 1;
         self.next_post_id = self.next_post_id + 1;
 
+        //push to user's post list
+        let mut user_posts = self.user_posts.get(&env::signer_account_id()).unwrap_or(vec![]);
+        user_posts.push(post_id);
+        self.user_posts.insert(&env::signer_account_id(), &user_posts); 
+
         let title = post.title;
 
         // Use env::log to record logs permanently to the blockchain!
         env::log(format!("Post '{}' was created", title).as_bytes());
+
+        post_id
     }
 
     pub fn get_owner(&self) -> AccountId {
@@ -178,6 +194,21 @@ impl Blog {
         let mut posts = Vec::new();
 
         for post_id in self.posts.keys() {
+            posts.push(self.posts.get(&post_id).unwrap());
+        }
+
+        posts
+    }
+
+    pub fn get_user_posts(&self, user_id: AccountId) -> Vec<Post> {
+        //if user_id has no post by checking length
+        if self.user_posts.get(&user_id).unwrap_or(vec![]).len() == 0 {
+            return vec![];
+        }
+
+        let mut posts = Vec::new();
+
+        for post_id in self.user_posts.get(&user_id).unwrap() {
             posts.push(self.posts.get(&post_id).unwrap());
         }
 
@@ -324,13 +355,27 @@ impl Blog {
     }
 
     pub fn get_paging_comments(self, post_id: usize, page: usize, page_size: usize) -> Vec<Comment> {
+        assert!(page_size > 0, "Page size must be greater than 0");
+        assert!(page > 0, "Page must be greater than 0");
+
         let post = self.posts.get(&post_id).unwrap();
         let mut comments = Vec::new();
-        for comment_id in post.comments {
-            comments.push(self.comments.get(&comment_id).unwrap());
+
+        let mut start = (page - 1) * page_size;
+        let mut end = start + page_size;
+         
+        if end > post.comments.len() {
+            end = post.comments.len();
         }
-        comments.sort_by(|a, b| b.created_at.cmp(&a.created_at));
-        comments.into_iter().skip(page * page_size).take(page_size).collect()
+
+        for comment_id in post.comments {
+            if start < end {
+                start = start + 1;
+                comments.push(self.comments.get(&comment_id).unwrap());
+            }
+        }
+
+        comments
     }
 
     pub fn get_total_comments(&self) -> usize {
@@ -346,13 +391,19 @@ impl Blog {
     }
 
     pub fn upvote(&mut self, post_id: usize) {
-        let mut post = self.posts.get(&post_id).unwrap();
+        let post = self.posts.get(&post_id).unwrap();
         assert!(post.post_id == post_id, "Post does not exist");
 
         let voter = env::signer_account_id(); 
-        post.add_upvote(voter);
         
-        self.posts.insert(&post_id, &post);
+        
+        match self.posts.get(&post_id).as_mut() {
+            Some(post) => {
+                post.add_upvote(voter);
+                self.posts.insert(&post_id, post);
+            },
+            None => panic!("Post does not exist"),
+        }
     }
 
     pub fn remove_upvote(&mut self, post_id: usize) {
@@ -366,13 +417,18 @@ impl Blog {
     }
 
     pub fn downvote(&mut self, post_id: usize) {
-        let mut post = self.posts.get(&post_id).unwrap();
+        let post = self.posts.get(&post_id).unwrap();
         assert!(post.post_id == post_id, "Post does not exist");
 
         let voter = env::signer_account_id(); 
-        post.add_downvote(voter);
-        
-        self.posts.insert(&post_id, &post);
+
+        match self.posts.get(&post_id).as_mut() {
+            Some(post) => {
+                post.add_downvote(voter);
+                self.posts.insert(&post_id, post);
+            },
+            None => panic!("Post does not exist"),
+        }
     }
 
     pub fn remove_downvote(&mut self, post_id: usize) {
@@ -394,6 +450,24 @@ impl Blog {
 
         (upvotes, downvotes)
     }
+
+    pub fn get_user_vote_status(&self, post_id: usize, user_id: AccountId) -> VoteStatus {
+        let post = self.posts.get(&post_id).unwrap();
+        assert!(post.post_id == post_id, "Post does not exist");
+
+        let voter = user_id;
+        let upvotes = post.upvotes.contains(&voter);
+        let downvotes = post.downvotes.contains(&voter);
+
+        if upvotes && !downvotes {
+            VoteStatus::Upvoted
+        } else if !upvotes && downvotes {
+            VoteStatus::Downvoted
+        } else {
+            VoteStatus::None
+        }
+    }
+
 }
 
 /*
@@ -455,6 +529,11 @@ mod tests {
         );
         assert_eq!(1, contract.get_total_posts());
         assert_eq!(0, contract.get_post(0).post_id);
+
+        //test get_user_posts
+        let user_posts = contract.get_user_posts("alice_near".to_string());
+        assert_eq!(1, user_posts.len());
+        assert_eq!(0, user_posts[0].post_id);
     }
 
     #[test]
@@ -465,7 +544,7 @@ mod tests {
         contract.create_post("This is the title".to_string(), "Lets go Brandon!".to_string());
         contract.delete_post(1);
         
-        assert_eq!(0, contract.get_total_posts());
+        assert_eq!(0, contract.get_total_posts(), "Total posts should be 0");
 
         // add a post
         contract.create_post("This is the title".to_string(), "Lets go Brandon!".to_string());
