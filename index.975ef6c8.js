@@ -1016,13 +1016,13 @@ var _reactRouterDom = require("react-router-dom");
 var _reactToastify = require("react-toastify");
 var _reactToastifyCss = require("react-toastify/dist/ReactToastify.css");
 window.nearInitPromise = _utils.initContract().then(()=>{
-    _reactDomDefault.default.render(/*#__PURE__*/ _jsxDevRuntime.jsxDEV(_reactRouterDom.BrowserRouter, {
+    _reactDomDefault.default.render(/*#__PURE__*/ _jsxDevRuntime.jsxDEV(_reactRouterDom.HashRouter, {
         children: [
             /*#__PURE__*/ _jsxDevRuntime.jsxDEV(_reactToastify.ToastContainer, {
-                theme: "colored",
+                theme: "dark",
                 transition: _reactToastify.Flip,
                 autoClose: "5000",
-                position: "bottom-center"
+                position: "top-center"
             }, void 0, false, {
                 fileName: "src/index.js",
                 lineNumber: 10,
@@ -24008,7 +24008,8 @@ async function initContract() {
             "get_post_total_comments",
             "get_votes_statistics",
             "get_next_post_id",
-            "get_user_posts"
+            "get_user_posts",
+            "get_user_vote_status"
         ],
         // Change methods can modify the state. But you don't receive the returned value when called.
         changeMethods: [
@@ -34759,8 +34760,8 @@ async function signTransaction(...args) {
 exports.signTransaction = signTransaction;
 
 },{"buffer":"fCgem","js-sha256":"ahVaM","./utils/enums":"kjmPo","borsh":"4JCmN","./utils/key_pair":"kBQFP"}],"ahVaM":[function(require,module,exports) {
-var process = require("process");
 var global = arguments[3];
+var process = require("process");
 /**
  * [js-sha256]{@link https://github.com/emn178/js-sha256}
  *
@@ -46634,13 +46635,15 @@ var _card = require("../components/presentation/Card");
 var _cardDefault = parcelHelpers.interopDefault(_card);
 var _reactPaginate = require("react-paginate");
 var _reactPaginateDefault = parcelHelpers.interopDefault(_reactPaginate);
+var _reactRouterDom = require("react-router-dom");
 var _s = $RefreshSig$();
 const PAGE_SIZE = 9;
 function Home() {
     _s();
-    const [posts1, setPosts] = _react.useState([]); // We start with an empty list of items.
+    const [posts1, setPosts] = _react.useState([]);
+    const navigate = _reactRouterDom.useNavigate(); // We start with an empty list of items.
     const [currentItems, setCurrentItems] = _react.useState(null);
-    const [pageCount, setPageCount] = _react.useState(0); // Here we use item offsets; we could also use page offsets
+    const [pageCount, setPageCount] = _react.useState(1); // Here we use item offsets; we could also use page offsets
     // following the API or data you're working with.
     const [itemOffset, setItemOffset] = _react.useState(0);
     const [totalPosts1, setTotalPosts] = _react.useState(0);
@@ -46662,7 +46665,8 @@ function Home() {
             page: selectedPage,
             page_size: PAGE_SIZE
         }).then((posts)=>{
-            setPosts(posts);
+            setPosts(posts); // navigate to the selected page
+            navigate(`/?page=${selectedPage}`);
         });
     }, [
         setPosts
@@ -46674,14 +46678,14 @@ function Home() {
                 children: "Home"
             }, void 0, false, {
                 fileName: "src/pages/Home.js",
-                lineNumber: 37,
+                lineNumber: 41,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ _jsxDevRuntime.jsxDEV(NewPosts, {
                 posts: posts1
             }, void 0, false, {
                 fileName: "src/pages/Home.js",
-                lineNumber: 38,
+                lineNumber: 42,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ _jsxDevRuntime.jsxDEV(_reactPaginateDefault.default, {
@@ -46689,7 +46693,7 @@ function Home() {
                 nextLabel: "next >",
                 onPageChange: handlePageClick,
                 pageRangeDisplayed: 5,
-                pageCount: totalPosts1 / PAGE_SIZE,
+                pageCount: Math.ceil(totalPosts1 / PAGE_SIZE),
                 previousLabel: "< previous",
                 renderOnZeroPageCount: null,
                 containerClassName: "flex gap-2 mx-auto w-full items-center",
@@ -46699,48 +46703,52 @@ function Home() {
                 nextClassName: "inline-flex items-center px-3 py-2 border border-gray-300 rounded-md cursor-pointer hover:bg-gray-100 hover:text-gray-900"
             }, void 0, false, {
                 fileName: "src/pages/Home.js",
-                lineNumber: 39,
+                lineNumber: 43,
                 columnNumber: 7
             }, this)
         ]
     }, void 0, true, {
         fileName: "src/pages/Home.js",
-        lineNumber: 36,
+        lineNumber: 40,
         columnNumber: 10
     }, this));
 }
 exports.default = Home;
-_s(Home, "DmUm4PrImDB14FmvXKU6yqbpU0g=");
+_s(Home, "tQQARkz82yrIiT6o2n/smg5XH4U=", false, function() {
+    return [
+        _reactRouterDom.useNavigate
+    ];
+});
 _c = Home;
 function NewPosts({ posts  }) {
     return(/*#__PURE__*/ _jsxDevRuntime.jsxDEV("section", {
-        class: "text-gray-600 body-font",
+        className: "text-gray-600 body-font",
         children: /*#__PURE__*/ _jsxDevRuntime.jsxDEV("div", {
-            class: "container px-5 py-10 mx-auto",
+            className: "container px-5 py-10 mx-auto",
             children: /*#__PURE__*/ _jsxDevRuntime.jsxDEV("div", {
-                class: "flex flex-wrap -mx-4 -my-8",
+                className: "flex flex-wrap -mx-4 -my-8",
                 children: posts.map((post)=>{
                     return(/*#__PURE__*/ _jsxDevRuntime.jsxDEV(_cardDefault.default, {
                         post: post
-                    }, void 0, false, {
+                    }, post.post_id, false, {
                         fileName: "src/pages/Home.js",
-                        lineNumber: 50,
+                        lineNumber: 54,
                         columnNumber: 18
                     }, this));
                 })
             }, void 0, false, {
                 fileName: "src/pages/Home.js",
-                lineNumber: 48,
+                lineNumber: 52,
                 columnNumber: 9
             }, this)
         }, void 0, false, {
             fileName: "src/pages/Home.js",
-            lineNumber: 47,
+            lineNumber: 51,
             columnNumber: 7
         }, this)
     }, void 0, false, {
         fileName: "src/pages/Home.js",
-        lineNumber: 46,
+        lineNumber: 50,
         columnNumber: 10
     }, this));
 }
@@ -46754,7 +46762,7 @@ $RefreshReg$(_c1, "NewPosts");
   window.$RefreshReg$ = prevRefreshReg;
   window.$RefreshSig$ = prevRefreshSig;
 }
-},{"react/jsx-dev-runtime":"iTorj","react":"21dqq","../components/presentation/Card":"jTPA6","react-paginate":"32kp1","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"km3Ru"}],"jTPA6":[function(require,module,exports) {
+},{"react/jsx-dev-runtime":"iTorj","react":"21dqq","../components/presentation/Card":"jTPA6","react-paginate":"32kp1","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"km3Ru","react-router-dom":"fdOAw"}],"jTPA6":[function(require,module,exports) {
 var $parcel$ReactRefreshHelpers$6ea0 = require("@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js");
 var prevRefreshReg = window.$RefreshReg$;
 var prevRefreshSig = window.$RefreshSig$;
@@ -46776,15 +46784,15 @@ function Card({ post  }) {
     const month = _momentDefault.default(created_at / 100000000).format("MMM");
     const day = _momentDefault.default(created_at / 100000000).format("DD");
     return(/*#__PURE__*/ _jsxDevRuntime.jsxDEV("div", {
-        class: "py-8 px-4 lg:w-1/3",
+        className: "px-4 py-8 lg:w-1/3",
         children: /*#__PURE__*/ _jsxDevRuntime.jsxDEV("div", {
-            class: "h-full flex items-start",
+            className: "flex items-start h-full",
             children: [
                 /*#__PURE__*/ _jsxDevRuntime.jsxDEV("div", {
-                    class: "w-12 flex-shrink-0 flex flex-col text-center leading-none",
+                    className: "flex flex-col flex-shrink-0 w-12 leading-none text-center",
                     children: [
                         /*#__PURE__*/ _jsxDevRuntime.jsxDEV("span", {
-                            class: "text-gray-500 pb-2 mb-2 border-b-2 border-gray-200",
+                            className: "pb-2 mb-2 text-gray-500 border-b-2 border-gray-200",
                             children: month
                         }, void 0, false, {
                             fileName: "src/components/presentation/Card.js",
@@ -46792,7 +46800,7 @@ function Card({ post  }) {
                             columnNumber: 11
                         }, this),
                         /*#__PURE__*/ _jsxDevRuntime.jsxDEV("span", {
-                            class: "font-medium text-lg text-gray-800 title-font leading-none",
+                            className: "text-lg font-medium leading-none text-gray-800 title-font",
                             children: day
                         }, void 0, false, {
                             fileName: "src/components/presentation/Card.js",
@@ -46806,10 +46814,10 @@ function Card({ post  }) {
                     columnNumber: 9
                 }, this),
                 /*#__PURE__*/ _jsxDevRuntime.jsxDEV("div", {
-                    class: "flex-grow pl-6",
+                    className: "flex-grow pl-6",
                     children: [
                         /*#__PURE__*/ _jsxDevRuntime.jsxDEV("h2", {
-                            class: "tracking-widest text-xs title-font font-medium text-indigo-500 mb-1",
+                            className: "mb-1 text-xs font-medium tracking-widest text-indigo-500 title-font",
                             children: "CATEGORY"
                         }, void 0, false, {
                             fileName: "src/components/presentation/Card.js",
@@ -46819,8 +46827,8 @@ function Card({ post  }) {
                         /*#__PURE__*/ _jsxDevRuntime.jsxDEV(_reactRouterDom.Link, {
                             to: `/posts/${post.post_id}`,
                             children: /*#__PURE__*/ _jsxDevRuntime.jsxDEV("h1", {
-                                class: "title-font text-xl font-medium text-gray-900 mb-3",
-                                children: title
+                                className: "mb-3 text-xl font-medium text-gray-900 title-font",
+                                children: title.length > 50 ? title.slice(0, 50) + "..." : title
                             }, void 0, false, {
                                 fileName: "src/components/presentation/Card.js",
                                 lineNumber: 32,
@@ -46831,8 +46839,8 @@ function Card({ post  }) {
                             lineNumber: 31,
                             columnNumber: 11
                         }, this),
-                        /*#__PURE__*/ _jsxDevRuntime.jsxDEV("p", {
-                            class: "leading-relaxed mb-5 line-clamp-2",
+                        /*#__PURE__*/ _jsxDevRuntime.jsxDEV("div", {
+                            className: "mb-5 leading-relaxed line-clamp-2",
                             children: /*#__PURE__*/ _jsxDevRuntime.jsxDEV(_interweaveDefault.default, {
                                 content: body.length > 100 ? body.substring(0, 100) + "..." : body
                             }, void 0, false, {
@@ -46845,30 +46853,24 @@ function Card({ post  }) {
                             lineNumber: 36,
                             columnNumber: 11
                         }, this),
-                        /*#__PURE__*/ _jsxDevRuntime.jsxDEV("a", {
-                            class: "inline-flex items-center",
+                        /*#__PURE__*/ _jsxDevRuntime.jsxDEV(_reactRouterDom.Link, {
+                            to: `profile/${author}`,
+                            className: "inline-flex items-center",
                             children: [
                                 /*#__PURE__*/ _jsxDevRuntime.jsxDEV("img", {
                                     alt: "blog",
                                     src: "https://dummyimage.com/103x103",
-                                    class: "w-8 h-8 rounded-full flex-shrink-0 object-cover object-center"
+                                    className: "flex-shrink-0 object-cover object-center w-8 h-8 rounded-full"
                                 }, void 0, false, {
                                     fileName: "src/components/presentation/Card.js",
                                     lineNumber: 40,
                                     columnNumber: 13
                                 }, this),
                                 /*#__PURE__*/ _jsxDevRuntime.jsxDEV("span", {
-                                    class: "flex-grow flex flex-col pl-3",
-                                    children: /*#__PURE__*/ _jsxDevRuntime.jsxDEV(_reactRouterDom.Link, {
-                                        to: `profile/${author}`,
-                                        children: /*#__PURE__*/ _jsxDevRuntime.jsxDEV("span", {
-                                            class: "title-font font-medium text-gray-900",
-                                            children: author
-                                        }, void 0, false, {
-                                            fileName: "src/components/presentation/Card.js",
-                                            lineNumber: 43,
-                                            columnNumber: 17
-                                        }, this)
+                                    className: "flex flex-col flex-grow pl-3",
+                                    children: /*#__PURE__*/ _jsxDevRuntime.jsxDEV("span", {
+                                        className: "font-medium text-gray-900 title-font",
+                                        children: author
                                     }, void 0, false, {
                                         fileName: "src/components/presentation/Card.js",
                                         lineNumber: 42,
@@ -52378,172 +52380,175 @@ function CreateNewPost() {
         lineNumber: 50,
         columnNumber: 12
     }, this));
-    return(/*#__PURE__*/ _jsxDevRuntime.jsxDEV("section", {
-        className: "w-full space-y-2",
-        children: [
-            query.get("errorCode") === "userRejected" && /*#__PURE__*/ _jsxDevRuntime.jsxDEV("div", {
-                className: "relative grid px-4 py-3 text-red-700 bg-red-100 border border-red-400 rounded",
-                children: [
-                    /*#__PURE__*/ _jsxDevRuntime.jsxDEV("strong", {
-                        className: "font-bold",
-                        children: "Error!"
-                    }, void 0, false, {
-                        fileName: "src/pages/CreateNewPost.js",
-                        lineNumber: 57,
-                        columnNumber: 11
-                    }, this),
-                    /*#__PURE__*/ _jsxDevRuntime.jsxDEV("div", {
-                        className: "block sm:inline",
-                        children: "User rejected transaction."
-                    }, void 0, false, {
-                        fileName: "src/pages/CreateNewPost.js",
-                        lineNumber: 58,
-                        columnNumber: 11
-                    }, this)
-                ]
-            }, void 0, true, {
-                fileName: "src/pages/CreateNewPost.js",
-                lineNumber: 56,
-                columnNumber: 53
-            }, this),
-            query.get("transactionHashes") && /*#__PURE__*/ _jsxDevRuntime.jsxDEV("div", {
-                className: "relative grid px-4 py-3 text-green-700 bg-green-100 border border-green-400 rounded",
-                children: [
-                    /*#__PURE__*/ _jsxDevRuntime.jsxDEV("strong", {
-                        className: "font-bold",
-                        children: "Success!"
-                    }, void 0, false, {
-                        fileName: "src/pages/CreateNewPost.js",
-                        lineNumber: 61,
-                        columnNumber: 11
-                    }, this),
-                    /*#__PURE__*/ _jsxDevRuntime.jsxDEV("div", {
-                        className: "block sm:inline",
-                        children: [
-                            "Transaction(s) submitted to the network.",
-                            /*#__PURE__*/ _jsxDevRuntime.jsxDEV("br", {
-                            }, void 0, false, {
-                                fileName: "src/pages/CreateNewPost.js",
-                                lineNumber: 64,
-                                columnNumber: 13
-                            }, this),
-                            "Transaction link:",
-                            /*#__PURE__*/ _jsxDevRuntime.jsxDEV("a", {
-                                href: _near.getTransactionUrl(query.get("transactionHashes")),
-                                class: "hover:underline",
-                                target: "_blank",
-                                children: _near.getTransactionUrl(query.get("transactionHashes"))
-                            }, void 0, false, {
-                                fileName: "src/pages/CreateNewPost.js",
-                                lineNumber: 66,
-                                columnNumber: 13
-                            }, this)
-                        ]
-                    }, void 0, true, {
-                        fileName: "src/pages/CreateNewPost.js",
-                        lineNumber: 62,
-                        columnNumber: 11
-                    }, this)
-                ]
-            }, void 0, true, {
-                fileName: "src/pages/CreateNewPost.js",
-                lineNumber: 60,
-                columnNumber: 42
-            }, this),
-            /*#__PURE__*/ _jsxDevRuntime.jsxDEV("h1", {
-                className: "text-3xl",
-                children: "Create New Post"
-            }, void 0, false, {
-                fileName: "src/pages/CreateNewPost.js",
-                lineNumber: 72,
-                columnNumber: 7
-            }, this),
-            /*#__PURE__*/ _jsxDevRuntime.jsxDEV("form", {
-                onSubmit: handleFormSubmit,
-                className: "space-y-2",
-                children: [
-                    /*#__PURE__*/ _jsxDevRuntime.jsxDEV("div", {
-                        children: [
-                            /*#__PURE__*/ _jsxDevRuntime.jsxDEV("label", {
-                                htmlFor: "title",
-                                children: "Title"
-                            }, void 0, false, {
-                                fileName: "src/pages/CreateNewPost.js",
-                                lineNumber: 76,
-                                columnNumber: 11
-                            }, this),
-                            /*#__PURE__*/ _jsxDevRuntime.jsxDEV("input", {
-                                id: "title",
-                                type: "text",
-                                className: "w-full p-2 rounded ring-1 ring-gray-400",
-                                name: "title"
-                            }, void 0, false, {
-                                fileName: "src/pages/CreateNewPost.js",
-                                lineNumber: 77,
-                                columnNumber: 11
-                            }, this)
-                        ]
-                    }, void 0, true, {
-                        fileName: "src/pages/CreateNewPost.js",
-                        lineNumber: 75,
-                        columnNumber: 9
-                    }, this),
-                    /*#__PURE__*/ _jsxDevRuntime.jsxDEV("div", {
-                        children: [
-                            /*#__PURE__*/ _jsxDevRuntime.jsxDEV("label", {
-                                htmlFor: "body",
-                                children: "Body"
-                            }, void 0, false, {
-                                fileName: "src/pages/CreateNewPost.js",
-                                lineNumber: 81,
-                                columnNumber: 11
-                            }, this),
-                            /*#__PURE__*/ _jsxDevRuntime.jsxDEV(_tinymceReact.Editor, {
-                                onInit: (evt, editor)=>editorRef.current = editor
-                                ,
-                                init: {
-                                    height: 500,
-                                    menubar: false,
-                                    plugins: [
-                                        "advlist autolink lists link image charmap print preview anchor",
-                                        "searchreplace visualblocks code fullscreen",
-                                        "insertdatetime media table paste code help wordcount"
-                                    ],
-                                    toolbar: "undo redo | formatselect | bold italic backcolor | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | removeformat | help",
-                                    content_style: "body { font-family:Helvetica,Arial,sans-serif; font-size:14px }"
-                                }
-                            }, void 0, false, {
-                                fileName: "src/pages/CreateNewPost.js",
-                                lineNumber: 82,
-                                columnNumber: 11
-                            }, this)
-                        ]
-                    }, void 0, true, {
-                        fileName: "src/pages/CreateNewPost.js",
-                        lineNumber: 80,
-                        columnNumber: 9
-                    }, this),
-                    /*#__PURE__*/ _jsxDevRuntime.jsxDEV("button", {
-                        type: "submit",
-                        className: "p-2 text-white transition bg-indigo-400 rounded hover:bg-opacity-80",
-                        children: "Create new post"
-                    }, void 0, false, {
-                        fileName: "src/pages/CreateNewPost.js",
-                        lineNumber: 91,
-                        columnNumber: 9
-                    }, this)
-                ]
-            }, void 0, true, {
-                fileName: "src/pages/CreateNewPost.js",
-                lineNumber: 74,
-                columnNumber: 7
-            }, this)
-        ]
-    }, void 0, true, {
-        fileName: "src/pages/CreateNewPost.js",
-        lineNumber: 55,
-        columnNumber: 10
-    }, this));
+    return(/*#__PURE__*/ _jsxDevRuntime.jsxDEV(_jsxDevRuntime.Fragment, {
+        children: /*#__PURE__*/ _jsxDevRuntime.jsxDEV("section", {
+            className: "w-full space-y-2",
+            children: [
+                query.get("errorCode") === "userRejected" && /*#__PURE__*/ _jsxDevRuntime.jsxDEV("div", {
+                    className: "relative grid px-4 py-3 text-red-700 bg-red-100 border border-red-400 rounded",
+                    children: [
+                        /*#__PURE__*/ _jsxDevRuntime.jsxDEV("strong", {
+                            className: "font-bold",
+                            children: "Error!"
+                        }, void 0, false, {
+                            fileName: "src/pages/CreateNewPost.js",
+                            lineNumber: 58,
+                            columnNumber: 13
+                        }, this),
+                        /*#__PURE__*/ _jsxDevRuntime.jsxDEV("div", {
+                            className: "block sm:inline",
+                            children: "User rejected transaction."
+                        }, void 0, false, {
+                            fileName: "src/pages/CreateNewPost.js",
+                            lineNumber: 59,
+                            columnNumber: 13
+                        }, this)
+                    ]
+                }, void 0, true, {
+                    fileName: "src/pages/CreateNewPost.js",
+                    lineNumber: 57,
+                    columnNumber: 55
+                }, this),
+                query.get("transactionHashes") && /*#__PURE__*/ _jsxDevRuntime.jsxDEV("div", {
+                    className: "relative grid px-4 py-3 text-green-700 bg-green-100 border border-green-400 rounded",
+                    children: [
+                        /*#__PURE__*/ _jsxDevRuntime.jsxDEV("strong", {
+                            className: "font-bold",
+                            children: "Success!"
+                        }, void 0, false, {
+                            fileName: "src/pages/CreateNewPost.js",
+                            lineNumber: 62,
+                            columnNumber: 13
+                        }, this),
+                        /*#__PURE__*/ _jsxDevRuntime.jsxDEV("div", {
+                            className: "block sm:inline",
+                            children: [
+                                "Transaction(s) submitted to the network.",
+                                /*#__PURE__*/ _jsxDevRuntime.jsxDEV("br", {
+                                }, void 0, false, {
+                                    fileName: "src/pages/CreateNewPost.js",
+                                    lineNumber: 65,
+                                    columnNumber: 15
+                                }, this),
+                                "Transaction link:",
+                                /*#__PURE__*/ _jsxDevRuntime.jsxDEV("a", {
+                                    href: _near.getTransactionUrl(query.get("transactionHashes")),
+                                    className: "hover:underline",
+                                    target: "_blank",
+                                    children: _near.getTransactionUrl(query.get("transactionHashes"))
+                                }, void 0, false, {
+                                    fileName: "src/pages/CreateNewPost.js",
+                                    lineNumber: 67,
+                                    columnNumber: 15
+                                }, this)
+                            ]
+                        }, void 0, true, {
+                            fileName: "src/pages/CreateNewPost.js",
+                            lineNumber: 63,
+                            columnNumber: 13
+                        }, this)
+                    ]
+                }, void 0, true, {
+                    fileName: "src/pages/CreateNewPost.js",
+                    lineNumber: 61,
+                    columnNumber: 44
+                }, this),
+                /*#__PURE__*/ _jsxDevRuntime.jsxDEV("h1", {
+                    className: "text-3xl",
+                    children: "Create New Post"
+                }, void 0, false, {
+                    fileName: "src/pages/CreateNewPost.js",
+                    lineNumber: 73,
+                    columnNumber: 9
+                }, this),
+                /*#__PURE__*/ _jsxDevRuntime.jsxDEV("form", {
+                    onSubmit: handleFormSubmit,
+                    className: "space-y-2",
+                    children: [
+                        /*#__PURE__*/ _jsxDevRuntime.jsxDEV("div", {
+                            children: [
+                                /*#__PURE__*/ _jsxDevRuntime.jsxDEV("label", {
+                                    htmlFor: "title",
+                                    children: "Title"
+                                }, void 0, false, {
+                                    fileName: "src/pages/CreateNewPost.js",
+                                    lineNumber: 77,
+                                    columnNumber: 13
+                                }, this),
+                                /*#__PURE__*/ _jsxDevRuntime.jsxDEV("input", {
+                                    id: "title",
+                                    type: "text",
+                                    className: "w-full p-2 rounded ring-1 ring-gray-400",
+                                    name: "title"
+                                }, void 0, false, {
+                                    fileName: "src/pages/CreateNewPost.js",
+                                    lineNumber: 78,
+                                    columnNumber: 13
+                                }, this)
+                            ]
+                        }, void 0, true, {
+                            fileName: "src/pages/CreateNewPost.js",
+                            lineNumber: 76,
+                            columnNumber: 11
+                        }, this),
+                        /*#__PURE__*/ _jsxDevRuntime.jsxDEV("div", {
+                            children: [
+                                /*#__PURE__*/ _jsxDevRuntime.jsxDEV("label", {
+                                    htmlFor: "body",
+                                    children: "Body"
+                                }, void 0, false, {
+                                    fileName: "src/pages/CreateNewPost.js",
+                                    lineNumber: 82,
+                                    columnNumber: 13
+                                }, this),
+                                /*#__PURE__*/ _jsxDevRuntime.jsxDEV(_tinymceReact.Editor // apiKey=""
+                                , {
+                                    onInit: (evt, editor)=>editorRef.current = editor
+                                    ,
+                                    init: {
+                                        height: 500,
+                                        menubar: false,
+                                        plugins: [
+                                            "advlist autolink lists link image charmap print preview anchor",
+                                            "searchreplace visualblocks code fullscreen",
+                                            "insertdatetime media table paste code help wordcount"
+                                        ],
+                                        toolbar: "undo redo | formatselect | bold italic backcolor | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | removeformat | help",
+                                        content_style: "body { font-family:Helvetica,Arial,sans-serif; font-size:14px }"
+                                    }
+                                }, void 0, false, {
+                                    fileName: "src/pages/CreateNewPost.js",
+                                    lineNumber: 83,
+                                    columnNumber: 13
+                                }, this)
+                            ]
+                        }, void 0, true, {
+                            fileName: "src/pages/CreateNewPost.js",
+                            lineNumber: 81,
+                            columnNumber: 11
+                        }, this),
+                        /*#__PURE__*/ _jsxDevRuntime.jsxDEV("button", {
+                            type: "submit",
+                            className: "p-2 text-white transition bg-indigo-400 rounded hover:bg-opacity-80",
+                            children: "Create new post"
+                        }, void 0, false, {
+                            fileName: "src/pages/CreateNewPost.js",
+                            lineNumber: 93,
+                            columnNumber: 11
+                        }, this)
+                    ]
+                }, void 0, true, {
+                    fileName: "src/pages/CreateNewPost.js",
+                    lineNumber: 75,
+                    columnNumber: 9
+                }, this)
+            ]
+        }, void 0, true, {
+            fileName: "src/pages/CreateNewPost.js",
+            lineNumber: 56,
+            columnNumber: 7
+        }, this)
+    }, void 0, false));
 }
 exports.default = CreateNewPost;
 _s(CreateNewPost, "cGCQOE0nlRBxgltYRstR8ilDOuw=", false, function() {
@@ -61023,34 +61028,125 @@ var _reactDevelopment = require("react/cjs/react.development");
 var _interweave = require("interweave");
 var _interweaveDefault = parcelHelpers.interopDefault(_interweave);
 var _reactSpinners = require("react-spinners");
-var _s = $RefreshSig$();
+var _reactToastify = require("react-toastify");
+var _solid = require("@heroicons/react/solid");
+var _s = $RefreshSig$(), _s1 = $RefreshSig$();
 function PostView() {
     _s();
     const { id  } = _reactRouterDom.useParams();
     const [post1, setPost] = _reactDevelopment.useState(null);
+    const [comments1, setComments] = _reactDevelopment.useState([]);
+    const navigate = _reactRouterDom.useNavigate(); // get current user vote status: None, Upvoted or Downvoted
+    const [voteStatus1, setVoteStatus] = _reactDevelopment.useState(null); // an array with 2 items, first item is upvote, second item is downvote
+    const [voteStatis, setVoteStatis] = _reactDevelopment.useState(null); // Dialog for checking voting list
+    let [isOpen, setIsOpen] = _reactDevelopment.useState(true);
     _reactDevelopment.useEffect(()=>{
-        if (id) window.contract.get_post({
-            post_id: parseInt(id)
-        }).then((post)=>{
-            setPost(post);
-        });
-    }, [
-        id
-    ]);
+        const loadData = async ()=>{
+            try {
+                if (id) {
+                    const loadPost = window.contract.get_post({
+                        post_id: parseInt(id)
+                    });
+                    const loadComments = window.contract.get_paging_comments({
+                        post_id: parseInt(id),
+                        page: 1,
+                        page_size: 10
+                    });
+                    const loadUpvoteState = window.contract.get_user_vote_status({
+                        post_id: parseInt(id),
+                        user_id: window.walletConnection.getAccountId()
+                    });
+                    const loadPoint = window.contract.get_votes_statistics({
+                        post_id: parseInt(id)
+                    });
+                    const [post, comments, voteStatus, point] = await Promise.all([
+                        loadPost,
+                        loadComments,
+                        loadUpvoteState,
+                        loadPoint
+                    ]);
+                    setPost(post);
+                    setComments(comments);
+                    setVoteStatus(voteStatus);
+                    setVoteStatis(point);
+                    console.log(post, comments, voteStatus, point);
+                }
+            } catch (e) {
+                console.log(e);
+                _reactToastify.toast.error("Post not found... redirecting to home ☹️");
+                navigate("/");
+            }
+        };
+        loadData();
+    }, []);
     if (!post1) return(/*#__PURE__*/ _jsxDevRuntime.jsxDEV("div", {
         className: "w-full mx-auto",
         children: /*#__PURE__*/ _jsxDevRuntime.jsxDEV(_reactSpinners.HashLoader, {
             loading: post1
         }, void 0, false, {
             fileName: "src/pages/posts/PostView.js",
-            lineNumber: 24,
+            lineNumber: 60,
             columnNumber: 9
         }, this)
     }, void 0, false, {
         fileName: "src/pages/posts/PostView.js",
-        lineNumber: 23,
+        lineNumber: 59,
         columnNumber: 12
     }, this));
+    const handleUpvoteButton = async ()=>{
+        try {
+            const result = voteStatus1 === "Upvoted" ? window.contract.remove_upvote({
+                post_id: parseInt(id)
+            }) : window.contract.upvote({
+                post_id: parseInt(id)
+            });
+            await _reactToastify.toast.promise(result, {
+                pending: voteStatus1 === "Upvoted" ? "Removing upvote..." : "Upvoting...",
+                success: voteStatus1 === "Upvoted" ? "Upvote removed successfully! 😄" : "Upvote added successfully! 😄",
+                error: voteStatus1 === "Upvoted" ? "Upvote removing failed! 😞" : "Upvote adding failed! 😞"
+            }); //Decrease when user change his mind
+            const newDownvoteStatis = voteStatis[1] - 1 * (voteStatus1 === "Downvoted");
+            const newVoteStatus = voteStatus1 === "Upvoted" ? "None" : "Upvoted";
+            const newPoint = voteStatus1 === "Upvoted" ? voteStatis[0] - 1 : voteStatis[0] + 1;
+            setVoteStatus(newVoteStatus);
+            setVoteStatis([
+                newPoint,
+                newDownvoteStatis
+            ]);
+        } catch (e) {
+            _reactToastify.toast.error(e.message);
+        }
+    };
+    const handleDownvoteButton = async ()=>{
+        try {
+            const result = voteStatus1 === "Downvoted" ? window.contract.remove_downvote({
+                post_id: parseInt(id)
+            }) : window.contract.downvote({
+                post_id: parseInt(id)
+            });
+            await _reactToastify.toast.promise(result, {
+                pending: voteStatus1 === "Downvoted" ? "Removing downvote..." : "Downvoting...",
+                success: voteStatus1 === "Downvoted" ? "Downvote removed successfully! 😄" : "Downvote added successfully! 😄",
+                error: voteStatus1 === "Downvoted" ? "Downvote removing failed! 😞" : "Downvote adding failed! 😞"
+            });
+            const newUpvoteStatis = voteStatis[0] - 1 * (voteStatus1 === "Upvoted");
+            const newVoteStatus = voteStatus1 === "Downvoted" ? "None" : "Downvoted";
+            const newPoint = voteStatus1 === "Downvoted" ? voteStatis[1] - 1 : voteStatis[1] + 1;
+            setVoteStatus(newVoteStatus);
+            setVoteStatis([
+                newUpvoteStatis,
+                newPoint
+            ]);
+        } catch (e) {
+            _reactToastify.toast.error(e.message);
+        }
+    };
+    function closeModal() {
+        setIsOpen(false);
+    }
+    function openModal() {
+        setIsOpen(true);
+    }
     const { title , body , author , post_id  } = post1;
     return(/*#__PURE__*/ _jsxDevRuntime.jsxDEV(_jsxDevRuntime.Fragment, {
         children: [
@@ -61061,12 +61157,59 @@ function PostView() {
                     children: "Back"
                 }, void 0, false, {
                     fileName: "src/pages/posts/PostView.js",
-                    lineNumber: 39,
+                    lineNumber: 128,
                     columnNumber: 9
                 }, this)
             }, void 0, false, {
                 fileName: "src/pages/posts/PostView.js",
-                lineNumber: 38,
+                lineNumber: 127,
+                columnNumber: 7
+            }, this),
+            /*#__PURE__*/ _jsxDevRuntime.jsxDEV("div", {
+                className: "top-[35%] shadow-md ring-1 ring-black ring-opacity-10 left-3 bg-gray-100 rounded p-4 fixed flex flex-col items-center justify-center",
+                children: [
+                    voteStatis && /*#__PURE__*/ _jsxDevRuntime.jsxDEV("span", {
+                        className: "text-2xl",
+                        children: voteStatis[0] - voteStatis[1]
+                    }, void 0, false, {
+                        fileName: "src/pages/posts/PostView.js",
+                        lineNumber: 132,
+                        columnNumber: 24
+                    }, this),
+                    /*#__PURE__*/ _jsxDevRuntime.jsxDEV("button", {
+                        className: `px-4 py-2 mb-1 font-bold text-white ${voteStatus1 === "Upvoted" ? "bg-blue-500" : "bg-gray-400"} rounded-full hover:bg-blue-700 transition`,
+                        onClick: handleUpvoteButton,
+                        children: /*#__PURE__*/ _jsxDevRuntime.jsxDEV(_solid.ThumbUpIcon, {
+                            className: "w-4 h-4"
+                        }, void 0, false, {
+                            fileName: "src/pages/posts/PostView.js",
+                            lineNumber: 137,
+                            columnNumber: 11
+                        }, this)
+                    }, void 0, false, {
+                        fileName: "src/pages/posts/PostView.js",
+                        lineNumber: 136,
+                        columnNumber: 9
+                    }, this),
+                    /*#__PURE__*/ _jsxDevRuntime.jsxDEV("button", {
+                        className: `px-4 py-2 mb-1 font-bold text-white ${voteStatus1 === "Downvoted" ? "bg-blue-500" : "bg-gray-400"} rounded-full hover:bg-blue-700 transition`,
+                        onClick: handleDownvoteButton,
+                        children: /*#__PURE__*/ _jsxDevRuntime.jsxDEV(_solid.ThumbDownIcon, {
+                            className: "w-4 h-4"
+                        }, void 0, false, {
+                            fileName: "src/pages/posts/PostView.js",
+                            lineNumber: 140,
+                            columnNumber: 11
+                        }, this)
+                    }, void 0, false, {
+                        fileName: "src/pages/posts/PostView.js",
+                        lineNumber: 139,
+                        columnNumber: 9
+                    }, this)
+                ]
+            }, void 0, true, {
+                fileName: "src/pages/posts/PostView.js",
+                lineNumber: 131,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ _jsxDevRuntime.jsxDEV("div", {
@@ -61077,7 +61220,7 @@ function PostView() {
                         children: title
                     }, void 0, false, {
                         fileName: "src/pages/posts/PostView.js",
-                        lineNumber: 43,
+                        lineNumber: 145,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ _jsxDevRuntime.jsxDEV("p", {
@@ -61090,13 +61233,13 @@ function PostView() {
                         ]
                     }, void 0, true, {
                         fileName: "src/pages/posts/PostView.js",
-                        lineNumber: 45,
+                        lineNumber: 147,
                         columnNumber: 9
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "src/pages/posts/PostView.js",
-                lineNumber: 42,
+                lineNumber: 144,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ _jsxDevRuntime.jsxDEV("div", {
@@ -61105,33 +61248,155 @@ function PostView() {
                     content: body
                 }, void 0, false, {
                     fileName: "src/pages/posts/PostView.js",
-                    lineNumber: 51,
+                    lineNumber: 153,
                     columnNumber: 9
                 }, this)
             }, void 0, false, {
                 fileName: "src/pages/posts/PostView.js",
-                lineNumber: 50,
+                lineNumber: 152,
+                columnNumber: 7
+            }, this),
+            /*#__PURE__*/ _jsxDevRuntime.jsxDEV("div", {
+                className: "w-full gap-2 p-2",
+                children: [
+                    /*#__PURE__*/ _jsxDevRuntime.jsxDEV("h1", {
+                        className: "text-xl",
+                        children: "Comments"
+                    }, void 0, false, {
+                        fileName: "src/pages/posts/PostView.js",
+                        lineNumber: 160,
+                        columnNumber: 9
+                    }, this),
+                    /*#__PURE__*/ _jsxDevRuntime.jsxDEV(CommentForm, {
+                        post_id: post_id
+                    }, void 0, false, {
+                        fileName: "src/pages/posts/PostView.js",
+                        lineNumber: 162,
+                        columnNumber: 9
+                    }, this),
+                    comments1.map((comment)=>/*#__PURE__*/ _jsxDevRuntime.jsxDEV("div", {
+                            children: /*#__PURE__*/ _jsxDevRuntime.jsxDEV("p", {
+                                children: [
+                                    /*#__PURE__*/ _jsxDevRuntime.jsxDEV(_reactRouterDom.Link, {
+                                        to: `/profile/{comment.author}`,
+                                        title: comment.author,
+                                        children: [
+                                            comment.author,
+                                            " - ",
+                                            comment.created_at
+                                        ]
+                                    }, void 0, true, {
+                                        fileName: "src/pages/posts/PostView.js",
+                                        lineNumber: 166,
+                                        columnNumber: 15
+                                    }, this),
+                                    ":",
+                                    comment.body
+                                ]
+                            }, void 0, true, {
+                                fileName: "src/pages/posts/PostView.js",
+                                lineNumber: 165,
+                                columnNumber: 13
+                            }, this)
+                        }, comment.comment_id, false, {
+                            fileName: "src/pages/posts/PostView.js",
+                            lineNumber: 164,
+                            columnNumber: 34
+                        }, this)
+                    )
+                ]
+            }, void 0, true, {
+                fileName: "src/pages/posts/PostView.js",
+                lineNumber: 159,
                 columnNumber: 7
             }, this)
         ]
     }, void 0, true));
 }
 exports.default = PostView;
-_s(PostView, "ooFvOzs7XHLSZEvhCAdKwhNrvRU=", false, function() {
+_s(PostView, "fU4Zg3rhwgItM7UqIMFKwlYodh0=", false, function() {
     return [
-        _reactRouterDom.useParams
+        _reactRouterDom.useParams,
+        _reactRouterDom.useNavigate
     ];
 });
 _c = PostView;
-var _c;
+function CommentForm({ post_id: post_id1  }) {
+    _s1();
+    const navigate = _reactRouterDom.useNavigate();
+    const handleFormSubmit = _react.useCallback(async (e)=>{
+        e.preventDefault();
+        const body = e.target.elements.body.value;
+        const post_id = e.target.elements.post_id.value;
+        try {
+            const result = window.contract.create_comment({
+                body,
+                post_id: parseInt(post_id)
+            });
+            await _reactToastify.toast.promise(result, {
+                pending: "Creating comment...",
+                success: "Creating comment successfully! 😄",
+                error: `Creating comment failed, your comment may be too short! 😞`
+            });
+            setTimeout(()=>{
+                // reload
+                window.location.reload();
+            }, 2000);
+        } catch (e1) {
+        }
+    }, []);
+    return(/*#__PURE__*/ _jsxDevRuntime.jsxDEV("form", {
+        onSubmit: handleFormSubmit,
+        children: [
+            /*#__PURE__*/ _jsxDevRuntime.jsxDEV("textarea", {
+                id: "body",
+                className: "w-full p-2 rounded ring-1 ring-gray-400"
+            }, void 0, false, {
+                fileName: "src/pages/posts/PostView.js",
+                lineNumber: 202,
+                columnNumber: 7
+            }, this),
+            /*#__PURE__*/ _jsxDevRuntime.jsxDEV("input", {
+                type: "hidden",
+                name: "post_id",
+                value: post_id1
+            }, void 0, false, {
+                fileName: "src/pages/posts/PostView.js",
+                lineNumber: 204,
+                columnNumber: 7
+            }, this),
+            /*#__PURE__*/ _jsxDevRuntime.jsxDEV("button", {
+                type: "submit",
+                className: "p-2 text-white transition bg-indigo-400 rounded hover:bg-opacity-80",
+                children: "Send comment"
+            }, void 0, false, {
+                fileName: "src/pages/posts/PostView.js",
+                lineNumber: 205,
+                columnNumber: 7
+            }, this)
+        ]
+    }, void 0, true, {
+        fileName: "src/pages/posts/PostView.js",
+        lineNumber: 201,
+        columnNumber: 10
+    }, this));
+}
+_s1(CommentForm, "g95pvpE4n3xDB7ehw1SuGpNS5KM=", false, function() {
+    return [
+        _reactRouterDom.useNavigate
+    ];
+});
+_c1 = CommentForm;
+var _c, _c1;
 $RefreshReg$(_c, "PostView");
+$RefreshReg$(_c1, "CommentForm");
 
   $parcel$ReactRefreshHelpers$c0a6.postlude(module);
 } finally {
   window.$RefreshReg$ = prevRefreshReg;
   window.$RefreshSig$ = prevRefreshSig;
 }
-},{"react/jsx-dev-runtime":"iTorj","react":"21dqq","react-router-dom":"fdOAw","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"km3Ru","react/cjs/react.development":"6YvXz","interweave":"70BG4","react-spinners":"e3vkp"}],"6aVBP":[function(require,module,exports) {
+},{"react/jsx-dev-runtime":"iTorj","react":"21dqq","react-router-dom":"fdOAw","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"km3Ru","react/cjs/react.development":"6YvXz","interweave":"70BG4","react-spinners":"e3vkp","react-toastify":"52zQU","@heroicons/react/solid":"9Z9eb"}],"6aVBP":[function(require,module,exports) {
 var $parcel$ReactRefreshHelpers$cf9c = require("@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js");
 var prevRefreshReg = window.$RefreshReg$;
 var prevRefreshSig = window.$RefreshSig$;
@@ -61186,7 +61451,6 @@ function ProfileView() {
         if (accountId) window.contract.get_user_posts({
             user_id: accountId
         }).then((posts)=>{
-            console.log(posts);
             setPosts(posts);
         });
     }, [
@@ -61202,7 +61466,7 @@ function ProfileView() {
                 ]
             }, void 0, true, {
                 fileName: "src/pages/profile/ProfileView.js",
-                lineNumber: 22,
+                lineNumber: 21,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ _jsxDevRuntime.jsxDEV("div", {
@@ -61216,7 +61480,7 @@ function ProfileView() {
                         ]
                     }, void 0, true, {
                         fileName: "src/pages/profile/ProfileView.js",
-                        lineNumber: 24,
+                        lineNumber: 23,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ _jsxDevRuntime.jsxDEV("div", {
@@ -61227,7 +61491,7 @@ function ProfileView() {
                                 children: "Posts"
                             }, void 0, false, {
                                 fileName: "src/pages/profile/ProfileView.js",
-                                lineNumber: 27,
+                                lineNumber: 26,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ _jsxDevRuntime.jsxDEV("ul", {
@@ -61242,45 +61506,45 @@ function ProfileView() {
                                                         className: "w-4 h-4"
                                                     }, void 0, false, {
                                                         fileName: "src/pages/profile/ProfileView.js",
-                                                        lineNumber: 31,
+                                                        lineNumber: 30,
                                                         columnNumber: 19
                                                     }, this),
                                                     /*#__PURE__*/ _jsxDevRuntime.jsxDEV("h2", {
                                                         children: post.title
                                                     }, void 0, false, {
                                                         fileName: "src/pages/profile/ProfileView.js",
-                                                        lineNumber: 32,
+                                                        lineNumber: 31,
                                                         columnNumber: 19
                                                     }, this)
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "src/pages/profile/ProfileView.js",
-                                                lineNumber: 30,
+                                                lineNumber: 29,
                                                 columnNumber: 17
                                             }, this),
                                             " "
                                         ]
                                     }, void 0, true, {
                                         fileName: "src/pages/profile/ProfileView.js",
-                                        lineNumber: 29,
+                                        lineNumber: 28,
                                         columnNumber: 32
                                     }, this)
                                 )
                             }, void 0, false, {
                                 fileName: "src/pages/profile/ProfileView.js",
-                                lineNumber: 28,
+                                lineNumber: 27,
                                 columnNumber: 11
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "src/pages/profile/ProfileView.js",
-                        lineNumber: 26,
+                        lineNumber: 25,
                         columnNumber: 9
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "src/pages/profile/ProfileView.js",
-                lineNumber: 23,
+                lineNumber: 22,
                 columnNumber: 7
             }, this)
         ]
