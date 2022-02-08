@@ -39580,57 +39580,57 @@ function getTransactionUrl(hash) {
 const CONTRACT_NAME = "dev-1644311995385-50581025258095";
 function getConfig(env) {
     switch(env){
-        case 'production':
-        case 'mainnet':
+        case "production":
+        case "mainnet":
             return {
-                networkId: 'mainnet',
-                nodeUrl: 'https://rpc.mainnet.near.org',
+                networkId: "mainnet",
+                nodeUrl: "https://rpc.mainnet.near.org",
                 contractName: CONTRACT_NAME,
-                walletUrl: 'https://wallet.near.org',
-                helperUrl: 'https://helper.mainnet.near.org',
-                explorerUrl: 'https://explorer.mainnet.near.org'
+                walletUrl: "https://wallet.near.org",
+                helperUrl: "https://helper.mainnet.near.org",
+                explorerUrl: "https://explorer.mainnet.near.org"
             };
-        case 'development':
-        case 'testnet':
+        case "development":
+        case "testnet":
             return {
-                networkId: 'testnet',
-                nodeUrl: 'https://rpc.testnet.near.org',
+                networkId: "testnet",
+                nodeUrl: "https://rpc.testnet.near.org",
                 contractName: CONTRACT_NAME,
-                walletUrl: 'https://wallet.testnet.near.org',
-                helperUrl: 'https://helper.testnet.near.org',
-                explorerUrl: 'https://explorer.testnet.near.org'
+                walletUrl: "https://wallet.testnet.near.org",
+                helperUrl: "https://helper.testnet.near.org",
+                explorerUrl: "https://explorer.testnet.near.org"
             };
-        case 'betanet':
+        case "betanet":
             return {
-                networkId: 'betanet',
-                nodeUrl: 'https://rpc.betanet.near.org',
+                networkId: "betanet",
+                nodeUrl: "https://rpc.betanet.near.org",
                 contractName: CONTRACT_NAME,
-                walletUrl: 'https://wallet.betanet.near.org',
-                helperUrl: 'https://helper.betanet.near.org',
-                explorerUrl: 'https://explorer.betanet.near.org'
+                walletUrl: "https://wallet.betanet.near.org",
+                helperUrl: "https://helper.betanet.near.org",
+                explorerUrl: "https://explorer.betanet.near.org"
             };
-        case 'local':
+        case "local":
             return {
-                networkId: 'local',
-                nodeUrl: 'http://localhost:3030',
+                networkId: "local",
+                nodeUrl: "http://localhost:3030",
                 keyPath: `${"/home/trungtin"}/.near/validator_key.json`,
-                walletUrl: 'http://localhost:4000/wallet',
+                walletUrl: "http://localhost:4000/wallet",
                 contractName: CONTRACT_NAME
             };
-        case 'test':
-        case 'ci':
+        case "test":
+        case "ci":
             return {
-                networkId: 'shared-test',
-                nodeUrl: 'https://rpc.ci-testnet.near.org',
+                networkId: "shared-test",
+                nodeUrl: "https://rpc.ci-testnet.near.org",
                 contractName: CONTRACT_NAME,
-                masterAccount: 'test.near'
+                masterAccount: "test.near"
             };
-        case 'ci-betanet':
+        case "ci-betanet":
             return {
-                networkId: 'shared-test-staging',
-                nodeUrl: 'https://rpc.ci-betanet.near.org',
+                networkId: "shared-test-staging",
+                nodeUrl: "https://rpc.ci-betanet.near.org",
                 contractName: CONTRACT_NAME,
-                masterAccount: 'test.near'
+                masterAccount: "test.near"
             };
         default:
             throw Error(`Unconfigured environment '${env}'. Can be configured in src/config.js.`);
@@ -42816,8 +42816,8 @@ Object.defineProperty(exports, "BinaryReader", {
 
 },{"borsh":"4JCmN"}],"4JCmN":[function(require,module,exports) {
 "use strict";
-var Buffer = require("buffer").Buffer;
 var global = arguments[3];
+var Buffer = require("buffer").Buffer;
 var __createBinding = this && this.__createBinding || (Object.create ? function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     Object.defineProperty(o, k2, {
@@ -50751,8 +50751,8 @@ async function signTransaction(...args) {
 exports.signTransaction = signTransaction;
 
 },{"buffer":"fCgem","js-sha256":"ahVaM","./utils/enums":"kjmPo","borsh":"4JCmN","./utils/key_pair":"kBQFP"}],"ahVaM":[function(require,module,exports) {
-var global = arguments[3];
 var process = require("process");
+var global = arguments[3];
 /**
  * [js-sha256]{@link https://github.com/emn178/js-sha256}
  *
