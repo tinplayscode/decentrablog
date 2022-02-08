@@ -95,16 +95,16 @@ export default function Header() {
               >
                 <Menu.Items className="absolute right-0 flex flex-col p-1 mt-1 bg-white rounded shadow-md ring-1 ring-black ring-opacity-5 w-60">
                   <Menu.Item
-                    as="a"
-                    href={`/profile/${window.accountId}`}
+                    as={Link}
+                    to={`/profile/${window.accountId}`}
                     className="inline-flex items-center gap-2 px-3 py-2 mt-4 text-base bg-white border-0 rounded focus:outline-none hover:bg-indigo-400 hover:text-white md:mt-0"
                   >
                     <UserIcon className="w-4 h-4"></UserIcon>
                     <span>Profile</span>
                   </Menu.Item>
                   <Menu.Item
-                    as="a"
-                    href="/create-new-post"
+                    as={Link}
+                    to="/create-new-post"
                     className="inline-flex items-center gap-2 px-3 py-2 mt-4 text-base bg-white border-0 rounded focus:outline-none hover:bg-indigo-400 hover:text-white md:mt-0"
                   >
                     <DocumentAddIcon className="w-4 h-4" />

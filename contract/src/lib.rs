@@ -9,7 +9,7 @@
 // To conserve gas, efficient serialization is achieved through Borsh (http://borsh.io/)
 use std::collections::HashSet;
 use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
-use near_sdk::{env, near_bindgen, setup_alloc, AccountId, Promise};
+use near_sdk::{env, near_bindgen, setup_alloc, AccountId};//, Promise};
 use near_sdk::collections::{UnorderedMap};
 use near_sdk::serde::{Serialize, Deserialize};
 
@@ -73,7 +73,7 @@ pub struct Post {
     pub upvotes: HashSet<AccountId>,
     pub downvotes: HashSet<AccountId>,
     
-    pub donation_logs: Vec<DonationLog>,
+    // pub donation_logs: Vec<DonationLog>,
 }
 
 impl Post {
@@ -89,7 +89,7 @@ impl Post {
             upvotes: HashSet::new(),
             downvotes: HashSet::new(),
 
-            donation_logs: Vec::new(),
+            // donation_logs: Vec::new(),
         }
     }
     
@@ -137,15 +137,15 @@ pub struct Comment {
     pub created_at: u64,
 }
 
-#[derive(Serialize, Deserialize, BorshDeserialize, BorshSerialize)]
-#[serde(crate = "near_sdk::serde")]
-pub struct DonationLog {
-    pub donation_id: usize,
-    pub amount: u128,
-    pub donor: AccountId,
-    pub created_at: u64,
-    pub message: String,
-}
+// #[derive(Serialize, Deserialize, BorshDeserialize, BorshSerialize)]
+// #[serde(crate = "near_sdk::serde")]
+// pub struct DonationLog {
+//     pub donation_id: usize,
+//     pub amount: u128,
+//     pub donor: AccountId,
+//     pub created_at: u64,
+//     pub message: String,
+// }
 
 #[near_bindgen]
 impl Blog {
@@ -162,7 +162,7 @@ impl Blog {
             comments: vec![],
             upvotes: HashSet::new(),
             downvotes: HashSet::new(),
-            donation_logs: vec![],
+            // donation_logs: vec![],
         };
         
         self.posts.insert(&post_id, &post);
@@ -294,51 +294,51 @@ impl Blog {
         self.total_comments = self.total_comments - 1;
     }
 
-    #[payable]
-    pub fn donate(&mut self, post_id: usize, amount: u128, message: String) {
-        // Check if the post exists
-        let post = self.posts.get(&post_id).unwrap();
-        assert!(post.post_id == post_id, "Post does not exist");
+    // #[payable]
+    // pub fn donate(&mut self, post_id: usize, amount: u128, message: String) {
+    //     // Check if the post exists
+    //     let post = self.posts.get(&post_id).unwrap();
+    //     assert!(post.post_id == post_id, "Post does not exist");
 
-        // check if the amount is valid
-        assert!(amount >= 1, "Amount must be greater than 0");
-        // enough balance
-        assert!(env::account_balance() >= amount, "Not enough balance");
+    //     // check if the amount is valid
+    //     assert!(amount >= 1, "Amount must be greater than 0");
+    //     // enough balance
+    //     assert!(env::account_balance() >= amount, "Not enough balance");
 
 
-        // transfer NEAR to the post author
-        let author = post.author;
-        let amount = amount;
+    //     // transfer NEAR to the post author
+    //     let author = post.author;
+    //     let amount = amount;
         
-        Promise::new(author).transfer(amount).then(self.save_to_donation_log(post_id, amount, message));
-    }
+    //     Promise::new(author).transfer(amount).then(self.save_to_donation_log(post_id, amount, message));
+    // }
 
-    #[private]
-    fn save_to_donation_log(&mut self, post_id: usize, amount: u128, message: String) -> Promise {
-        let donor = env::signer_account_id();
-        let created_at = env::block_timestamp();
+    // #[private]
+    // fn save_to_donation_log(&mut self, post_id: usize, amount: u128, message: String) -> Promise {
+    //     let donor = env::signer_account_id();
+    //     let created_at = env::block_timestamp();
 
-        let donation_log = DonationLog {
-            donation_id: self.next_comment_id,
-            amount,
-            donor,
-            created_at,
-            message,
-        };
+    //     let donation_log = DonationLog {
+    //         donation_id: self.next_comment_id,
+    //         amount,
+    //         donor,
+    //         created_at,
+    //         message,
+    //     };
 
-        self.next_comment_id = self.next_comment_id + 1;
-        self.total_comments = self.total_comments + 1;
+    //     self.next_comment_id = self.next_comment_id + 1;
+    //     self.total_comments = self.total_comments + 1;
 
-        // save to donation log
-        let mut post = self.posts.get(&post_id).unwrap();
-        post.donation_logs.push(donation_log);
-        self.posts.insert(&post_id, &post);
+    //     // save to donation log
+    //     let mut post = self.posts.get(&post_id).unwrap();
+    //     post.donation_logs.push(donation_log);
+    //     self.posts.insert(&post_id, &post);
 
-        let donor = env::signer_account_id();
+    //     let donor = env::signer_account_id();
 
-        //Mark the promise as fulfilled by doing nothing
-        Promise::new(donor)
-    }
+    //     //Mark the promise as fulfilled by doing nothing
+    //     Promise::new(donor)
+    // }
 
     pub fn get_next_post_id(&self) -> usize {
         self.next_post_id
@@ -679,22 +679,22 @@ mod tests {
         // assert_eq!(17, posts[0].post_id, "Paging post id is not 17");
     }
 
-    #[test]
-    fn test_donation() {
-        let context = get_context(vec![], false);
-        testing_env!(context);
-        let mut contract = Blog::default();
+    // #[test]
+    // fn test_donation() {
+    //     let context = get_context(vec![], false);
+    //     testing_env!(context);
+    //     let mut contract = Blog::default();
 
-        // Create the first post
-        contract.create_post("This is the title".to_string(), "Lets go Brandon!".to_string());
+    //     // Create the first post
+    //     contract.create_post("This is the title".to_string(), "Lets go Brandon!".to_string());
 
-        // Donate
-        contract.donate(0, 1000000, "Support Trump for the USA".to_string());
+    //     // Donate
+    //     contract.donate(0, 1000000, "Support Trump for the USA".to_string());
 
-        // Check if the donation is there
-        assert_eq!(
-            1,
-            contract.get_post(0).donation_logs.len()
-        );
-    }
+    //     // Check if the donation is there
+    //     assert_eq!(
+    //         1,
+    //         contract.get_post(0).donation_logs.len()
+    //     );
+    // }
 }
