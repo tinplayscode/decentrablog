@@ -6,6 +6,8 @@ import { Link } from "react-router-dom";
 import { HashLoader } from "react-spinners";
 import { toast } from "react-toastify";
 import { ThumbDownIcon, ThumbUpIcon } from "@heroicons/react/solid";
+import { Helmet } from "react-helmet";
+import moment from "moment";
 
 export default function PostView() {
   const { id } = useParams();
@@ -164,6 +166,10 @@ export default function PostView() {
 
   return (
     <>
+      <Helmet>
+        <title>{title} - humanofnear.com</title>
+      </Helmet>
+
       {/* Back button */}
       <button className="px-4 py-2 mb-4 font-bold text-white bg-blue-500 rounded-full hover:bg-blue-700">
         <Link to="/">Back</Link>
@@ -214,7 +220,8 @@ export default function PostView() {
           <div key={comment.comment_id}>
             <p>
               <Link to={`/profile/{comment.author}`} title={comment.author}>
-                {comment.author} - {comment.created_at}
+                {comment.author} -{" "}
+                {moment(Date(comment.created_at / 1000000)).fromNow()}
               </Link>
               :{comment.body}
             </p>
