@@ -6,8 +6,9 @@ import moment from "moment";
 export default function Card({ post }) {
   const { post_id, title, body, author, created_at } = post;
 
-  const month = moment(created_at / 1e8).format("MMM");
-  const day = moment(created_at / 1e8).format("DD");
+  const time = new Date(created_at / 1000000);
+  const month = moment(time).format("MMM");
+  const day = moment(time).format("DD");
 
   return (
     <div className="px-4 py-8 lg:w-1/3">

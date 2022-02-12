@@ -66,7 +66,7 @@ impl Blog {
     pub fn create_post(&mut self, title: String, body: String) -> usize {
         let post_id = self.next_post_id;
 
-        let post =  Post::new(post_id, title, body, env::predecessor_account_id(), env::epoch_height());
+        let post =  Post::new(post_id, title, body, env::predecessor_account_id(), env::block_timestamp());
         
         self.posts.insert(&post_id, &post);
         self.next_post_id = self.next_post_id + 1;
@@ -224,7 +224,7 @@ impl Blog {
         post.add_donation_logs(donation_log);
         self.posts.insert(&post_id, &post);
 
-        let donor = env::signer_account_id();
+        let donor = env::predecessor_account_id();
 
         //Mark the promise as fulfilled by doing nothing
         Promise::new(donor)
@@ -378,8 +378,7 @@ impl Blog {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use near_sdk::env::log;
-    use near_sdk::{MockedBlockchain, log};
+    use near_sdk::{MockedBlockchain};
     use near_sdk::{testing_env, VMContext};
 
     // mock the context for testing, notice "signer_account_id" that was accessed above from env::

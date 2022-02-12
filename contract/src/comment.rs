@@ -26,7 +26,7 @@ impl Comment {
         self.comment_id
     }
 
-    pub fn get_body(&self) -> &str {
-        &self.body
+    pub fn get_body(&self) -> String {
+        self.body.clone()
     }
 }
